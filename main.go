@@ -1,23 +1,21 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/go-chi/chi"
 )
 
-func main() {
-	b := []byte{}
-	bb := bytes.NewBuffer(b)
-	bb.Write([]byte("Hello"))
-	fmt.Println(b)
+func mainx() {
+	fmt.Println(net.ParseIP("127.0.0.1"))
+	fmt.Println(net.ParseIP("127.0.0.11/12"))
 }
 
-func main1() {
+func main() {
 	// connect
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {

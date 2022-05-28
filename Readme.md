@@ -2,7 +2,7 @@
 
 SSCM manages your self-signed certificate, which usually used within internal networks.
 
-SSCM recommendation when managing self-signed certificate is to have single Self-Signed Root Certificate Authority that can be distributed within the organization to be locally trusted. Using those Self Signed RootCA, we can then create specific certificate for each domains/subdomains or IPs.
+SSCM recommendation when managing self-signed certificate is to have single Self-Signed Root Certificate Authority that can be distributed within the organization to be locally trusted. Then use those Self Signed RootCA to create domain/subdomain/IP specific certificates.
 
 ## Planned Endpoints
 

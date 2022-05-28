@@ -28,7 +28,7 @@ type Storage interface {
 
 type Data struct {
 	ID               int
-	IsRoot           bool
+	ParentID         int
 	CertificateBytes []byte
 	PrivateKeyBytes  []byte
 
@@ -36,15 +36,19 @@ type Data struct {
 }
 
 type Info struct {
-	CommonName   string
-	Country      string
-	Organization string
-	IPAddresses  []net.IP
-	DNSNames     []string
-	ExpiredAt    time.Time
+	CommonName   string    `json:"common_name"`
+	Country      string    `json:"country"`
+	Organization string    `json:"organization"`
+	IPAddresses  []string  `json:"ip"`
+	DNSNames     []string  `json:"dns"`
+	ExpiredAt    time.Time `json:"expired_at"`
 }
 
 func (man Manager) AddRootCA(cert *Data) (err error) {
+	ips := make([]net.IP, len(cert.IPAddresses))
+	for i, v := range cert.IPAddresses {
+		ips[i] = net.ParseIP(v)
+	}
 	certs := x509.Certificate{
 		Subject: pkix.Name{
 			CommonName:   cert.CommonName,
@@ -53,7 +57,7 @@ func (man Manager) AddRootCA(cert *Data) (err error) {
 		},
 		NotBefore:   time.Now(),
 		NotAfter:    cert.ExpiredAt,
-		IPAddresses: cert.IPAddresses,
+		IPAddresses: ips,
 		DNSNames:    cert.DNSNames,
 	}
 
@@ -67,7 +71,7 @@ func (man Manager) AddRootCA(cert *Data) (err error) {
 		return err
 	}
 
-	cert.IsRoot = true
+	cert.ParentID = 0 // root
 	cert.CertificateBytes = cb
 	cert.PrivateKeyBytes = kb.Bytes()
 
@@ -88,6 +92,10 @@ func (man Manager) AddServerCertificate(cert *Data, parentId int) (err error) {
 		return err
 	}
 
+	ips := make([]net.IP, len(cert.IPAddresses))
+	for i, v := range cert.IPAddresses {
+		ips[i] = net.ParseIP(v)
+	}
 	certs := x509.Certificate{
 		Subject: pkix.Name{
 			CommonName:   cert.CommonName,
@@ -96,7 +104,7 @@ func (man Manager) AddServerCertificate(cert *Data, parentId int) (err error) {
 		},
 		NotBefore:   time.Now(),
 		NotAfter:    cert.ExpiredAt,
-		IPAddresses: cert.IPAddresses,
+		IPAddresses: ips,
 		DNSNames:    cert.DNSNames,
 	}
 
@@ -110,7 +118,7 @@ func (man Manager) AddServerCertificate(cert *Data, parentId int) (err error) {
 		return err
 	}
 
-	cert.IsRoot = false
+	cert.ParentID = parentId
 	cert.CertificateBytes = b
 	cert.PrivateKeyBytes = kb.Bytes()
 	return man.Store(cert)
