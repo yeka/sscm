@@ -13,3 +13,29 @@ SSCM recommendation when managing self-signed certificate is to have single Self
 ### [POST] /cert - Create a child certificate
 ### [GET] /cert/id - Download specific child certificate and the key
 ### [GET] /search?q=xx - Search all certificates by query
+
+## Development
+
+### FrontEnd
+
+To develop the frontend part, enter web directory and run develpoment mode:
+```bash
+cd web
+npm run dev
+```
+
+### Backend
+
+## Building / Compiling
+
+Building this app requires 2 step. First the Frontend and then the Backend.
+The Frontend must be built first, because the static files will be bundled into the Backend.
+
+```bash
+cd web
+npm run build
+cd ..
+go build --trimpath .
+```
+
+After compilation, you only need the exe/binary file.

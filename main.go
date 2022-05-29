@@ -16,8 +16,28 @@ func mainx() {
 }
 
 func main() {
+	db, err := InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM certificates")
+	if err != nil {
+		log.Fatal(err)
+	}
+	i := 0
+	for rows.Next() {
+		i++
+	}
+	rows.Close()
+
+	fmt.Println(i, "rows found")
+}
+
+func main2() {
 	// connect
-	db, err := sql.Open("sqlite", ":memory:")
+	db, err := sql.Open("sqlite", "./sscm.sqlite")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,4 +48,28 @@ func main() {
 	row.Scan(&s)
 	fmt.Println(s)
 	_ = chi.NewMux()
+}
+
+var createTableQuery = `CREATE TABLE IF NOT EXISTS certificates (
+  id INT PRIMARY KEY,
+  parent INT,
+  cert BLOB,
+  key BLOB,
+  info TEXT
+);
+CREATE INDEX IF NOT EXISTS cert_parent ON certificates (parent);
+`
+
+func InitDB() (*sql.DB, error) {
+	db, err := sql.Open("sqlite", "./sscm.sqlite")
+	if err != nil {
+		return db, err
+	}
+
+	_, err = db.Exec(createTableQuery)
+	if err != nil {
+		return db, err
+	}
+
+	return db, err
 }
