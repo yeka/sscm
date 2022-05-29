@@ -2,20 +2,42 @@ package main
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
+	"net/http"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/go-chi/chi"
 )
+
+//go:embed web/public/*
+var myfs embed.FS
+
+func main() {
+	sfs, err := fs.Sub(myfs, "web/public")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	hfs := http.FileServer(http.FS(sfs))
+	http.Handle("/", hfs)
+
+	log.Print("Listening on :3000...")
+
+	if err := http.ListenAndServe(":3000", nil); err != nil {
+		log.Fatal(err)
+	}
+}
 
 func mainx() {
 	fmt.Println(net.ParseIP("127.0.0.1"))
 	fmt.Println(net.ParseIP("127.0.0.11/12"))
 }
 
-func main() {
+func maindb() {
 	db, err := InitDB()
 	if err != nil {
 		log.Fatal(err)
