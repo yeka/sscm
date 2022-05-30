@@ -3,7 +3,7 @@
 </script>
 
 <div class="box">
-    <img src="" alt="certificate" />
+    <img src="imgs/Root.png" alt="certificate" />
     {name}
 </div>
 
@@ -16,4 +16,7 @@
 		padding: 1em;
 		margin: 0 0 1em 0;
 	}
+    .box img {
+        height: 48px;
+    }
 </style>

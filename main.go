@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"database/sql"
 	"embed"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/go-chi/chi"
@@ -23,13 +26,50 @@ func main() {
 	}
 
 	hfs := http.FileServer(http.FS(sfs))
-	http.Handle("/", hfs)
+	http.Handle("/", gzipped(hfs))
 
 	log.Print("Listening on :3000...")
 
 	if err := http.ListenAndServe(":3000", nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func gzipped(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if !strings.Contains(req.Header.Get("Accept-Encoding"), "gzip") {
+			h.ServeHTTP(w, req)
+			return
+		}
+
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+
+		for k, v := range rec.Header() {
+			if k == "Content-Length" {
+				continue
+			}
+			for _, vv := range v {
+				w.Header().Add(k, vv)
+			}
+		}
+
+		if rec.Result().StatusCode == http.StatusOK {
+			w.Header().Set("Content-Encoding", "gzip")
+			w.WriteHeader(rec.Result().StatusCode)
+			gw := gzip.NewWriter(w)
+			gw.Write(rec.Body.Bytes())
+			gw.Flush()
+		} else {
+			w.WriteHeader(rec.Result().StatusCode)
+			w.Write(rec.Body.Bytes())
+		}
+		// fmt.Println(rec.Body.Len())
+		// w.Write(rec.Body.Bytes())
+
+		// gzip.NewWriter(w).Write(rec.Body.Bytes())
+
+	})
 }
 
 func mainx() {
