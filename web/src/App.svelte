@@ -1,16 +1,19 @@
 <script lang="ts">
 	import Navbar from './layout/Navbar.svelte';
-	import Root from './layout/Root.svelte';
-	import Cert from './layout/Cert.svelte';
-	import Create from './layout/Create.svelte';
-	import Search from './layout/Search.svelte';
+	import Router from './Router.svelte';
+	
+	import NotFound from './page/NotFound.svelte';
+	import Root from './page/Root.svelte';
+	import Cert from './page/Cert.svelte';
+	import Create from './page/Create.svelte';
+	import Search from './page/Search.svelte';
 
-
-	export let name: string;
-	let hash = window.location.hash;
-	window.addEventListener("hashchange", function() {
-		hash = window.location.hash;
-	});
+	var routes = {
+		"/": Root,
+		"/cert": Cert,
+		"/create": Create,
+		"/search": Search,
+	}
 </script>
 
 <Navbar />
@@ -23,19 +26,7 @@
 		<a href="#/search">Search</a>
 	</nav>
 
-	<h1>Hello {name}! Hash is: {hash}</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-	{#if hash=='#/' || hash == ''}
-	<Root />
-	{:else if hash=='#/cert'}
-	<Cert />
-	{:else if hash=='#/create'}
-	<Create />
-	{:else if hash=='#/search'}
-	<Search />
-	{:else}
-	Not found
-	{/if}
+	<Router {routes}><NotFound /></Router>
 </main>
 
 <style>

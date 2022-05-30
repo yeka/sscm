@@ -1,11 +1,30 @@
+<script>
+	var a;
+	let b = false;
+	function search(e) {
+		if (a !== undefined) {
+			clearTimeout(a);
+		}
+		b = false;
+		a = setTimeout(() => {
+			b = true;
+		}, 500);
+	}
+</script>
+
+
 <div class="topnav">
-    <a class="active" href="#/" title="Self Signed Certificate Management">SSCM</a>
+    <a class="active" href="/" title="Self Signed Certificate Management">SSCM</a>
     <!--
 	<a class="active" href="#home">Home</a>
 	<a href="#news">News</a>
 	<a href="#contact">Contact</a>
 	<a href="#about">About</a>
     -->
+	<div class="searchbox">
+	<input type="text" on:blur="{search}" on:change="{search}" on:keydown="{search}"/>
+	{#if b}Changed{:else}...{/if}
+	</div>
 </div>
 
 <style>
@@ -35,4 +54,5 @@
 .topnav a.active {
 	color: white;
 }
+
 </style>
