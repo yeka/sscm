@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Navbar from './layout/Navbar.svelte';
-	import Router from './Router.svelte';
+	import SPA from './router/SPA.svelte';
 	
 	import NotFound from './page/NotFound.svelte';
 	import Root from './page/Root.svelte';
@@ -11,22 +11,26 @@
 	var routes = {
 		"/": Root,
 		"/cert": Cert,
+		"/cert/:id": Cert,
 		"/create": Create,
 		"/search": Search,
 	}
+	let router
 </script>
 
 <Navbar />
 
 <main>
 	<nav>
-		<a href="#/">Home</a>
-		<a href="#/cert">Cert</a>
-		<a href="#/create">Create</a>
-		<a href="#/search">Search</a>
+		<a href="#/" on:click|preventDefault={router.navigate("#/")}>Home</a>
+		<a href="#/cert" on:click|preventDefault={router.navigate("#/cert")}>Cert</a>
+		<a href="#/create" on:click|preventDefault={router.navigate("#/create")}>Create</a>
+		<a href="#/search" on:click|preventDefault={router.navigate("#/search")}>Search</a>
 	</nav>
 
-	<Router {routes}><NotFound /></Router>
+	<SPA {routes} bind:this={router} let:hash={hash}>
+		Not found {hash}
+	</SPA>
 </main>
 
 <style>
