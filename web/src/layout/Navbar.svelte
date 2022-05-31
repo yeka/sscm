@@ -22,27 +22,31 @@
 	<a href="#about">About</a>
     -->
 	<div class="searchbox">
-	<input type="text" on:blur="{search}" on:change="{search}" on:keydown="{search}"/>
-	{#if b}Changed{:else}...{/if}
+            <input type="text" on:blur="{search}" on:change="{search}" on:keydown="{search}"/>
+            {#if b}Changed{:else}...{/if}
 	</div>
 </div>
 
 <style>
 /* Add a black background color to the top navigation */
 .topnav {
+        text-align: center;
 	background-color: rgb(6, 102, 176);
 	overflow: hidden;
-    min-height: 48px;
+        min-height: 48px;
 }
+.topnav .searchbox {display: inline-block; padding-top: 12px; padding-bottom: 5px;}
   
 /* Style the links inside the navigation bar */
 .topnav a {
+    position: absolute;
+        left: 20px;
+        top: 12px;
 	float: left;
 	color: #f2f2f2;
-	text-align: center;
-	padding: 14px 16px;
 	text-decoration: none;
-	font-size: 17px;
+	font-size: 24px;
+        font-weight: bold;
 }
 
 /* Change the color of links on hover */
