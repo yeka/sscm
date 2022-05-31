@@ -15,7 +15,6 @@
 		"/create": Create,
 		"/search": Search,
 	}
-	let router
 </script>
 
 <Navbar />
@@ -28,8 +27,8 @@
 		<a href="#/search" on:click|preventDefault={() => navigate("#/search")}>Search</a>
 	</nav>
 
-	<SPA {routes} bind:this={router} let:hash={hash}>
-		Not found {hash}
+	<SPA {routes} let:hash={hash}>
+		<NotFound {hash} />
 	</SPA>
 </main>
 
