@@ -1,62 +1,59 @@
 <script>
-	var a;
-	let b = false;
-	function search(e) {
-		if (a !== undefined) {
-			clearTimeout(a);
-		}
-		b = false;
-		a = setTimeout(() => {
-			b = true;
-		}, 500);
-	}
+    var a;
+    let b = false;
+    function search(e) {
+        if (a !== undefined) {
+            clearTimeout(a);
+        }
+        b = false;
+        a = setTimeout(() => {
+            b = true;
+        }, 500);
+    }
 </script>
-
 
 <div class="topnav">
     <a class="active" href="/" title="Self Signed Certificate Management">SSCM</a>
-    <!--
-	<a class="active" href="#home">Home</a>
-	<a href="#news">News</a>
-	<a href="#contact">Contact</a>
-	<a href="#about">About</a>
-    -->
-	<div class="searchbox">
-            <input type="text" on:blur="{search}" on:change="{search}" on:keydown="{search}"/>
-            {#if b}Changed{:else}...{/if}
-	</div>
+
+    <div class="searchbox">
+        <input placeholder="Search" type="text" on:blur={search} on:change={search} on:keydown={search} />
+        {#if b}Changed{:else}...{/if}
+    </div>
 </div>
 
 <style>
-/* Add a black background color to the top navigation */
-.topnav {
+    /* Add a black background color to the top navigation */
+    .topnav {
         text-align: center;
-	background-color: rgb(6, 102, 176);
-	overflow: hidden;
+        background-color: rgb(6, 102, 176);
+        overflow: hidden;
         min-height: 48px;
-}
-.topnav .searchbox {display: inline-block; padding-top: 12px; padding-bottom: 5px;}
-  
-/* Style the links inside the navigation bar */
-.topnav a {
-    position: absolute;
+    }
+    .topnav .searchbox {
+        display: inline-block;
+        padding-top: 12px;
+        padding-bottom: 5px;
+    }
+
+    /* Style the links inside the navigation bar */
+    .topnav a {
+        position: absolute;
         left: 20px;
         top: 12px;
-	float: left;
-	color: #f2f2f2;
-	text-decoration: none;
-	font-size: 24px;
+        float: left;
+        color: #f2f2f2;
+        text-decoration: none;
+        font-size: 24px;
         font-weight: bold;
-}
+    }
 
-/* Change the color of links on hover */
-.topnav a:hover {
-	color:  #04AA6D !important;
-}
+    /* Change the color of links on hover */
+    .topnav a:hover {
+        color: #04aa6d !important;
+    }
 
-/* Add a color to the active/current link */
-.topnav a.active {
-	color: white;
-}
-
+    /* Add a color to the active/current link */
+    .topnav a.active {
+        color: white;
+    }
 </style>

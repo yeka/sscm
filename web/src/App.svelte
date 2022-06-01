@@ -22,10 +22,9 @@
 <main>
 	<nav>
 		<a href="#/" on:click|preventDefault={() => navigate("#/")}>Home</a>
-		<a href="#/cert" on:click|preventDefault={() => navigate("#/cert")}>Cert</a>
-		<a href="#/create" on:click|preventDefault={() => navigate("#/create")}>Create</a>
-		<a href="#/search" on:click|preventDefault={() => navigate("#/search")}>Search</a>
 	</nav>
+
+	<hr/>
 
 	<SPA {routes} let:hash={hash}>
 		<NotFound {hash} />

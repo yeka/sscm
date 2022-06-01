@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"sscm/pkg/certs"
 	"sscm/pkg/certs/filestorage"
 	"sscm/servers"
@@ -23,20 +24,27 @@ import (
 var myfs embed.FS
 
 func main() {
+	var sfs fs.FS
+	sfs, err := fs.Sub(myfs, "web/public")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(os.Args) == 2 && os.Args[1] == "dev" {
+		sfs = os.DirFS("web/public/")
+		fmt.Println("using live directory")
+	}
+
 	cs, err := filestorage.New("certificates.storages")
 	if err != nil {
-		log.Fatal("unable to open storage file:", err)
+		log.Fatal("unable to open storage file (certificates.storages):", err)
 	}
 
 	cm := certs.Manager{Storage: cs}
 	mux := servers.Routes(cm)
 
-	sfs, err := fs.Sub(myfs, "web/public")
-	if err != nil {
-		log.Fatal(err)
-	}
 	hfs := http.FileServer(http.FS(sfs))
-	mux.Handle("/", gzipped(hfs))
+	mux.Handle("/*", gzipped(hfs))
 
 	log.Print("Listening on :3000...")
 

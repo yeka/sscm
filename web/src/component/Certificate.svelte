@@ -1,15 +1,26 @@
 <script type="ts">
-    export let name = "My Root Cert";
+    export let name = "My Root Cert"
+    export let root = true
+    export let domain = ""
+    export let expired = ""
+    export let href = ""
+    export let downloadable = false
+    let img = root ? "imgs/Root.png" : "imgs/Standard.png"
 </script>
+
 <div class="box">
     <div class="left">
-        <img src="imgs/Root.png" alt="certificate" />
+        <img src="{img}" alt="certificate" />
     </div>
     <div class="right">
         {name}<br/>
-        hello<br/>
-        world
+        {domain}<br/>
+        {expired}
     </div>
+
+    {#if downloadable}
+    <a href="{href}">Download</a>
+    {/if}
 </div>
 
 <style>

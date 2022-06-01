@@ -1,3 +1,3 @@
-import DummyAPI from "./api_dumy";
-const API = new DummyAPI();
+import TheAPI from "./real_api";
+const API = new TheAPI("");
 export default API;
