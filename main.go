@@ -20,12 +20,12 @@ import (
 	"github.com/go-chi/chi"
 )
 
-//go:embed web/public/*
+//go:embed web/dist/*
 var myfs embed.FS
 
 func main() {
 	var sfs fs.FS
-	sfs, err := fs.Sub(myfs, "web/public")
+	sfs, err := fs.Sub(myfs, "web/dist")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,9 +46,9 @@ func main() {
 	hfs := http.FileServer(http.FS(sfs))
 	mux.Handle("/*", gzipped(hfs))
 
-	log.Print("Listening on :3000...")
+	log.Print("Listening on :2000...")
 
-	if err := http.ListenAndServe(":3000", mux); err != nil {
+	if err := http.ListenAndServe(":2000", mux); err != nil {
 		log.Fatal(err)
 	}
 }

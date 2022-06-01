@@ -32,7 +32,7 @@ func Routes(cm certs.Manager) *chi.Mux {
 	mux := chi.NewMux()
 	mux.Route("/api", func(api chi.Router) {
 		api.Use(cors.Handler(cors.Options{
-			AllowedOrigins: []string{"http://localhost:8123"},
+			AllowedOrigins: []string{"http://localhost:3000"},
 		}))
 		api.Get("/certs", h.ListCert)   // ?root=int
 		api.Post("/cert", h.CreateCert) // ?root=int

@@ -1,11 +1,14 @@
 <script type="ts">
+    import imgRoot from "../assets/Root.png"
+    import imgStandard from "../assets/Standard.png"
+
     export let name = "My Root Cert"
     export let root = true
     export let domain = ""
     export let expired = ""
     export let href = ""
     export let downloadable = false
-    let img = root ? "imgs/Root.png" : "imgs/Standard.png"
+    let img = root ? imgRoot : imgStandard
 </script>
 
 <div class="box">

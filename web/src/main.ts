@@ -1,9 +1,8 @@
-import App from './App.svelte';
+import App from './App.svelte'
+import "./global.scss"
 
 const app = new App({
-	target: document.body,
-	props: {
-	}
-});
+  target: document.getElementById('app')
+})
 
-export default app;
+export default app
