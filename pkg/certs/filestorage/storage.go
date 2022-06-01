@@ -25,6 +25,11 @@ type dataFile struct {
 func New(filename string) (*FS, error) {
 	fs := &FS{filename: filename}
 	b, err := os.ReadFile(filename)
+	if os.IsNotExist(err) {
+		fs.dataFile.maps = make(map[int]int)
+		fs.dataFile.childs = make(map[int][]int)
+		return fs, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -56,23 +61,25 @@ func (fs *FS) Store(cert *certs.Data) (err error) {
 	return err
 }
 
-func (fs *FS) Load(id int, isRoot bool) (data certs.Data, err error) {
-	if (isRoot && fs.data[fs.maps[id]].ParentID > 0) || (!isRoot && fs.data[fs.maps[id]].ParentID == 0) {
+func (fs *FS) Load(id int) (data certs.Data, err error) {
+	i, ok := fs.maps[id]
+	if !ok {
 		err = errors.New("data not found")
 		return
 	}
+	if i >= len(fs.data) {
+		err = errors.New("error index out of scope")
+		return
+	}
 
-	data = fs.data[fs.maps[id]]
+	data = fs.data[i]
 	return
 }
 
-func (fs *FS) Search(query string, mode certs.SearchMode) ([]certs.Data, error) {
+func (fs *FS) Search(query string, parentId int) ([]certs.Data, error) {
 	res := make([]certs.Data, 0)
 	for _, v := range fs.data {
-		if v.ParentID > 0 && mode == certs.RootOnly {
-			continue
-		}
-		if v.ParentID == 0 && mode == certs.NonRootOnly {
+		if (parentId >= 0) && v.ParentID != parentId {
 			continue
 		}
 		// TODO: filter query string

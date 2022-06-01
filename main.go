@@ -10,6 +10,9 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"sscm/pkg/certs"
+	"sscm/pkg/certs/filestorage"
+	"sscm/servers"
 	"strings"
 
 	_ "github.com/glebarez/go-sqlite"
@@ -20,17 +23,24 @@ import (
 var myfs embed.FS
 
 func main() {
+	cs, err := filestorage.New("certificates.storages")
+	if err != nil {
+		log.Fatal("unable to open storage file:", err)
+	}
+
+	cm := certs.Manager{Storage: cs}
+	mux := servers.Routes(cm)
+
 	sfs, err := fs.Sub(myfs, "web/public")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	hfs := http.FileServer(http.FS(sfs))
-	http.Handle("/", gzipped(hfs))
+	mux.Handle("/", gzipped(hfs))
 
 	log.Print("Listening on :3000...")
 
-	if err := http.ListenAndServe(":3000", nil); err != nil {
+	if err := http.ListenAndServe(":3000", mux); err != nil {
 		log.Fatal(err)
 	}
 }

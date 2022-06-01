@@ -51,11 +51,13 @@ var serverCert = x509.Certificate{
 }
 */
 
+// CreateRootCA is the main function to create a Root CA certificate
 func CreateRootCA(cert *x509.Certificate) ([]byte, PrivateKey, error) {
 	*cert = RootCert(*cert)
 	return CreateCertificate(cert, nil, nil)
 }
 
+// CreateServerCertificate is the main function to create an intermediary or a standard certificate
 func CreateServerCertificate(cert, parent *x509.Certificate, parentKey PrivateKey) ([]byte, PrivateKey, error) {
 	*cert = ServerCert(*cert)
 	return CreateCertificate(cert, parent, parentKey)
@@ -103,6 +105,7 @@ func GenerateRSAKey() (PrivateKey, error) {
 // ====== Helper ======
 // ====================
 
+// RootCert is a helper function to add Root CA common information to given cert
 func RootCert(cert x509.Certificate) x509.Certificate {
 	cert.NotBefore = time.Now()
 	cert.SerialNumber = big.NewInt(1) // TODO: Randomize
@@ -114,6 +117,7 @@ func RootCert(cert x509.Certificate) x509.Certificate {
 	return cert
 }
 
+// IntermediateCert is a helper function to add intermediate common information to given cert
 func IntermediateCert(cert x509.Certificate) x509.Certificate {
 	cert.NotBefore = time.Now()
 	cert.SerialNumber = big.NewInt(2) // TODO: Randomize
@@ -125,6 +129,7 @@ func IntermediateCert(cert x509.Certificate) x509.Certificate {
 	return cert
 }
 
+// ServerCert is a helper function to add standard common information to given cert
 func ServerCert(cert x509.Certificate) x509.Certificate {
 	cert.NotBefore = time.Now()
 	cert.SerialNumber = big.NewInt(3) // TODO: Randomize
@@ -134,11 +139,13 @@ func ServerCert(cert x509.Certificate) x509.Certificate {
 	return cert
 }
 
+// WriteCert writes certificate bytes to an io.Writer
 func WriteCert(cert []byte, w io.Writer) error {
 	err := pem.Encode(w, &pem.Block{Type: "CERTIFICATE", Bytes: cert})
 	return err
 }
 
+// WriteKey writes certificate key to an io.Writer
 func WriteKey(key PrivateKey, w io.Writer) error {
 	privBytes, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
@@ -148,6 +155,7 @@ func WriteKey(key PrivateKey, w io.Writer) error {
 	return err
 }
 
+// LoadCert loads a certificate from an io.Reader
 func LoadCert(r io.Reader) (*x509.Certificate, error) {
 	certBytes, err := io.ReadAll(r)
 	if err != nil {
@@ -158,6 +166,7 @@ func LoadCert(r io.Reader) (*x509.Certificate, error) {
 	return x509.ParseCertificate(certPem.Bytes)
 }
 
+// LoadKey loads a certificate key from an io.Reader
 func LoadKey(r io.Reader) (PrivateKey, error) {
 	keyBytes, err := io.ReadAll(r)
 	if err != nil {

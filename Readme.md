@@ -6,12 +6,9 @@ SSCM recommendation when managing self-signed certificate is to have single Self
 
 ## Planned Endpoints
 
-### [GET] /root - List of root certificates
-### [POST] /root - Create a root certificate
-### [GET] /root/id - Download specific root certificate (without the key)
-### [GET] /cert?root=xx - List all child certificates
-### [POST] /cert - Create a child certificate
-### [GET] /cert/id - Download specific child certificate and the key
+### [GET] /cert?root=xx - List all child certificates (or root if ?root=0)
+### [POST] /cert?parent=xx - Create a child certificate (or root if ?parent=0)
+### [GET] /cert/id - Download specific certificate (root without the key, child with key)
 ### [GET] /search?q=xx - Search all certificates by query
 
 ## Development

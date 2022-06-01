@@ -13,17 +13,18 @@ type Manager struct {
 	Storage
 }
 
-type SearchMode int
-
-const RootOnly SearchMode = 0
-const NonRootOnly SearchMode = 1
-const AllCertificates SearchMode = 2
-
 type Storage interface {
 	// Store should override cert.ID using database ID on success
 	Store(cert *Data) (err error)
-	Load(id int, isRoot bool) (data Data, err error)
-	Search(query string, mode SearchMode) ([]Data, error)
+
+	Load(id int) (data Data, err error)
+
+	// Search certificates based on query string
+	// empty query means just list the certificate
+	// parentId = -1, list all certificates
+	// parentId = 0, list root certificates
+	// parentId > 0, list certificates under given parentId
+	Search(query string, parentId int) ([]Data, error)
 }
 
 type Data struct {
@@ -79,7 +80,7 @@ func (man Manager) AddRootCA(cert *Data) (err error) {
 }
 
 func (man Manager) AddServerCertificate(cert *Data, parentId int) (err error) {
-	parent, err := man.Load(parentId, true)
+	parent, err := man.Load(parentId)
 	if err != nil {
 		return err
 	}
