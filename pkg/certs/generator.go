@@ -9,64 +9,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"io"
-	"math/big"
-	"time"
 )
-
-/*
-var rootCert = x509.Certificate{
-	Subject: pkix.Name{
-		Country:      []string{"ID"},
-		Organization: []string{"YK Brothers Co."},
-		CommonName:   "Yeka Root CA",
-	},
-	NotBefore:   time.Now(),
-	NotAfter:    time.Now().AddDate(10, 0, 0),
-	IPAddresses: []net.IP{},
-	DNSNames:    []string{},
-}
-
-var intermediateCert = x509.Certificate{
-	Subject: pkix.Name{
-		Country:      []string{"ID"},
-		Organization: []string{"YK Intermediate Corp"},
-		CommonName:   "Yeka Intermediate CA",
-	},
-	NotBefore:   time.Now(),
-	NotAfter:    time.Now().AddDate(10, 0, 0),
-	IPAddresses: []net.IP{},
-	DNSNames:    []string{},
-}
-
-var serverCert = x509.Certificate{
-	Subject: pkix.Name{
-		Country:      []string{"ID"},
-		Organization: []string{"Go Web Corp."},
-		CommonName:   "Go Web",
-	},
-	NotBefore:   time.Now(),
-	NotAfter:    time.Now().AddDate(10, 0, 0),
-	IPAddresses: []net.IP{},
-	DNSNames:    []string{"cc.local"},
-}
-*/
-
-// CreateRootCA is the main function to create a Root CA certificate
-func CreateRootCA(cert *x509.Certificate) ([]byte, PrivateKey, error) {
-	*cert = RootCert(*cert)
-	return CreateCertificate(cert, nil, nil)
-}
-
-// CreateServerCertificate is the main function to create an intermediary or a standard certificate
-func CreateServerCertificate(cert, parent *x509.Certificate, parentKey PrivateKey) ([]byte, PrivateKey, error) {
-	*cert = ServerCert(*cert)
-	return CreateCertificate(cert, parent, parentKey)
-}
 
 // CreateCertificate creates a server certificate using ECDSA private key
 // To create RootCA, parent & parentKey should be nill
 func CreateCertificate(cert, parent *x509.Certificate, parentKey PrivateKey) ([]byte, PrivateKey, error) {
 	key, err := GenerateECDSAKey()
+	// key, err := GenerateRSAKey()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -98,46 +47,12 @@ func GenerateECDSAKey() (PrivateKey, error) {
 }
 
 func GenerateRSAKey() (PrivateKey, error) {
-	return rsa.GenerateKey(rand.Reader, 2048)
+	return rsa.GenerateKey(rand.Reader, 4096)
 }
 
 // ====================
 // ====== Helper ======
 // ====================
-
-// RootCert is a helper function to add Root CA common information to given cert
-func RootCert(cert x509.Certificate) x509.Certificate {
-	cert.NotBefore = time.Now()
-	cert.SerialNumber = big.NewInt(1) // TODO: Randomize
-	cert.KeyUsage = x509.KeyUsageCertSign | x509.KeyUsageCRLSign
-	cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
-	cert.BasicConstraintsValid = true
-	cert.IsCA = true
-	cert.MaxPathLen = 2
-	return cert
-}
-
-// IntermediateCert is a helper function to add intermediate common information to given cert
-func IntermediateCert(cert x509.Certificate) x509.Certificate {
-	cert.NotBefore = time.Now()
-	cert.SerialNumber = big.NewInt(2) // TODO: Randomize
-	cert.KeyUsage = x509.KeyUsageCertSign | x509.KeyUsageCRLSign
-	cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
-	cert.BasicConstraintsValid = true
-	cert.IsCA = true
-	cert.MaxPathLen = 1
-	return cert
-}
-
-// ServerCert is a helper function to add standard common information to given cert
-func ServerCert(cert x509.Certificate) x509.Certificate {
-	cert.NotBefore = time.Now()
-	cert.SerialNumber = big.NewInt(3) // TODO: Randomize
-	cert.KeyUsage = x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign
-	cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
-	cert.BasicConstraintsValid = true
-	return cert
-}
 
 // WriteCert writes certificate bytes to an io.Writer
 func WriteCert(cert []byte, w io.Writer) error {

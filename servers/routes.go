@@ -3,17 +3,12 @@ package servers
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/json"
-	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"sscm/pkg/certs"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -151,6 +146,7 @@ func (h Handler) CreateCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// read certificate request
 	var req CreateRequest
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -159,97 +155,22 @@ func (h Handler) CreateCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cert := x509.Certificate{
-		Subject: pkix.Name{
-			Country:      []string{req.Country},
-			Organization: []string{req.Organization},
+	data := certs.Data{
+		ParentID: rootId,
+		Info: certs.Info{
 			CommonName:   req.Name,
+			Country:      req.Country,
+			Organization: req.Organization,
 		},
-		NotBefore:   time.Now(),
-		NotAfter:    time.Now().AddDate(10, 0, 0),
-		IPAddresses: []net.IP{},
-		DNSNames:    []string{},
 	}
 	if req.IP != "" {
-		cert.IPAddresses = []net.IP{net.ParseIP(req.IP)}
+		data.IPAddresses = []string{req.IP}
 	}
 	if req.DNS != "" {
-		cert.DNSNames = []string{req.DNS}
+		data.DNSNames = []string{req.DNS}
 	}
 
-	var certByte []byte
-	var certKey certs.PrivateKey
-
-	if rootId == 0 {
-		certByte, certKey, err = certs.CreateRootCA(&cert)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	} else {
-		// load parent certificate
-		rootData, err := h.cm.Load(rootId)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if len(rootData.CertificateBytes) == 0 {
-			fmt.Println("empty root bytes")
-			return
-		}
-		rootCert, err := certs.LoadCert(bytes.NewReader(rootData.CertificateBytes))
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		rootKey, err := certs.LoadKey(bytes.NewReader(rootData.PrivateKeyBytes))
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		certByte, certKey, err = certs.CreateServerCertificate(&cert, rootCert, rootKey)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-
-	bufC := bytes.Buffer{}
-	if err := certs.WriteCert(certByte, &bufC); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	bufK := bytes.Buffer{}
-	if err := certs.WriteKey(certKey, &bufK); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	data := certs.Data{
-		ParentID:         rootId,
-		CertificateBytes: bufC.Bytes(),
-		PrivateKeyBytes:  bufK.Bytes(),
-		Info: certs.Info{
-			CommonName:   cert.Subject.CommonName,
-			Country:      cert.Subject.Country[0],
-			Organization: cert.Subject.Organization[0],
-			IPAddresses:  []string{req.IP},
-			DNSNames:     cert.DNSNames,
-		},
-	}
-
-	if err := h.cm.Store(&data); err != nil {
+	if err := h.cm.Create(&data); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -280,7 +201,7 @@ func (h Handler) DownloadCert(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`.crt"`)
 		w.Header().Set("Content-Transfer-Encoding", "binary")
 		w.WriteHeader(http.StatusOK)
-		err = certs.WriteCert(crt.CertificateBytes, w)
+		_, err = w.Write(crt.CertificateBytes)
 		if err != nil {
 			log.Println(err)
 		}
@@ -294,7 +215,7 @@ func (h Handler) DownloadCert(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	err = certs.WriteCert(crt.CertificateBytes, cw)
+	_, err = cw.Write(crt.CertificateBytes)
 	if err != nil {
 		log.Println(err)
 	}
